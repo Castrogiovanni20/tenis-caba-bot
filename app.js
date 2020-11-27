@@ -22,4 +22,5 @@ bot.action('all right', (ctx) => {
   ctx.editMessageText('<i>May happiness be with you 🙏</i>',
     Extra.HTML())
 })
+
 bot.launch()
