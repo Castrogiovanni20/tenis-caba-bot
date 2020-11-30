@@ -1,4 +1,5 @@
 const axios = require('axios')
+const dayjs = require('dayjs')
 
 class turnosService {
     constructor(API_URL) {
@@ -12,6 +13,7 @@ class turnosService {
             res.data[0].sede.nombre = 'Parque Manuel Belgrano (ex Kdt)'
         }
 
+        res.data[0].sede.servicioId = servicioId 
         res.data[0].sede.nombre = res.data[0].sede.nombre.split("-").pop()
         res.data[0].sede.telefono = this.getTelefonoById(res.data[0].sede.id)
 
@@ -28,6 +30,30 @@ class turnosService {
         }
 
         return sedes
+    }
+
+    getFechasDisponiblesById = async (servicioId, fromDate) => {
+        const res = await axios.get(this.API_URL + 'FechasDisp?servicioId=' + servicioId + '&fromDate=' + fromDate)
+        return res.data
+    }
+
+    /* getAllFechasDisponiblesById = async (fromDate) => {
+        const arrID = [2964, 3149, 3137, 3126, 3125, 3154, 3161]
+        let res, sedes = []
+
+        for (let i = 0; i < arrID.length; i++) {
+            res = await this.getFechasDisponiblesById(arrID[i], fromDate)
+            sedes.push(res)
+        }
+
+        return sedes
+    } */
+
+    getProximosTurnos = async (servicioId) => {
+        const currentdate = dayjs(new Date()).toJSON().substring(0,10)
+        let turnos = await this.getFechasDisponiblesById(servicioId, currentdate)
+
+        return turnos
     }
 
     getTelefonoById = (id) => {
