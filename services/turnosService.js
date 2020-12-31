@@ -12,10 +12,9 @@ class turnosService {
         if (servicioId == 2964){
             res.data[0].sede.nombre = 'Parque Manuel Belgrano (ex Kdt)'
         }
-
-        res.data[0].sede.servicioId = servicioId 
-        res.data[0].sede.nombre = res.data[0].sede.nombre.split("-").pop()
-        res.data[0].sede.telefono = this.getTelefonoById(res.data[0].sede.id)
+        res.data.servicioId = servicioId 
+        res.data.nombre = res.data[0].sede.nombre.split("-").pop()
+        res.data.telefono = this.getTelefonoById(res.data[0].sede.id)
 
         return res.data
     }
@@ -55,6 +54,14 @@ class turnosService {
 
         return turnos
     }
+
+    getHoraDisponibleByFecha = async (servicioId, day, sedeId) => {
+        let res = await axios.get(this.API_URL + 'getHorasDisp?servicioId=' + servicioId + '&day=' + day + '&sedeId=' + sedeId)
+        let resParse = res.data.toString().replace('T', ' ').substring(0, 16)
+
+        return resParse
+    }
+
 
     getTelefonoById = (id) => {
         var telefono
