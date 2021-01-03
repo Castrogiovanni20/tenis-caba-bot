@@ -57,9 +57,9 @@ class turnosService {
 
     getHoraDisponibleByFecha = async (servicioId, day, sedeId) => {
         let res = await axios.get(this.API_URL + 'getHorasDisp?servicioId=' + servicioId + '&day=' + day + '&sedeId=' + sedeId)
-        let resParse = res.data.toString().replace('T', ' ').substring(0, 16)
+        //let resParse = res.data.toString().replace('T', ' ')
 
-        return resParse
+        return res.data
     }
 
 

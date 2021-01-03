@@ -66,7 +66,7 @@ class telegramService {
 
              // Nombre
               bot.action(sede[0].sede.id.toString(), (ctx) => {
-                ctx.editMessageText(sede.nombre,
+                ctx.replyWithHTML('<b>' + sede.nombre + '</b>',
                 Extra.HTML()  
                   .markup(Markup.inlineKeyboard([
                     Markup.callbackButton('Ver proximos turnos disponibles', 'turnos-' + servicioIdSeleccionado),
@@ -78,37 +78,51 @@ class telegramService {
               
               // Turnos disponibles
               bot.action('turnos-' + servicioIdSeleccionado, (ctx) => {
-                ctx.editMessageText('Estos son los proximos turnos disponibles: ',
-                Extra.HTML()
-                .markup((m) => {
-                  let listMarkups = []      
-            
-                  turnos.forEach(async (turno) => {
-                      fechaSeleccionada = turno
-                      listMarkups.push(m.callbackButton(turno, 'canchas-' + servicioIdSeleccionado + fechaSeleccionada))
-                      
-                      bot.action('canchas-' + servicioIdSeleccionado + fechaSeleccionada, (ctx) => {
-                        ctx.reply('Selecciona la cancha.',
-                        Extra.HTML()
-                        .markup((m) => {
-                          let listMarkupsCancha = []      
-                    
-                            sede.forEach(async (cancha) => {
-                              let sedeIdSeleccionado = cancha.sede.id
-                              
-                              listMarkupsCancha.push(m.callbackButton(cancha.sede.nombre, 'cancha-' + servicioIdSeleccionado + fechaSeleccionada + sedeIdSeleccionado))
-                              let horasDisponibles = await this.turnosService.getHoraDisponibleByFecha(servicioIdSeleccionado, fechaSeleccionada, sedeIdSeleccionado)
-                              bot.action('cancha-' + servicioIdSeleccionado + fechaSeleccionada + sedeIdSeleccionado, (ctx) => {
-                                ctx.reply('Horario disponible: ' + horasDisponibles)
-                             }) 
-                            })
+
+                if (turnos.length > 0) { 
+                  ctx.replyWithHTML('Estos son los proximos turnos disponibles para el polideportivo ' + '<b>' + sede.nombre + '</b>',
+                  Extra.HTML()
+                  .markup((m) => {
+                    let listMarkups = []      
+              
+                    turnos.forEach(async (turno) => {
+                        fechaSeleccionada = turno
+                        listMarkups.push(m.callbackButton(turno, 'canchas-' + servicioIdSeleccionado + fechaSeleccionada))
                         
-                            return m.inlineKeyboard(listMarkupsCancha, { columns : 1 })
-                        }))
-                    }) 
-                  })
-                
-                  return m.inlineKeyboard(listMarkups, { columns : 1 })}))
+                        bot.action('canchas-' + servicioIdSeleccionado + fechaSeleccionada, (ctx) => {
+                          ctx.replyWithHTML('<b> Selecciona la cancha </b>',
+                          Extra.HTML()
+                          .markup((m) => {
+                            let listMarkupsCancha = []      
+                      
+                              sede.forEach(async (cancha) => {
+                                let sedeIdSeleccionado = cancha.sede.id
+                                
+                                listMarkupsCancha.push(m.callbackButton(cancha.sede.nombre, 'cancha-' + servicioIdSeleccionado + fechaSeleccionada + sedeIdSeleccionado))
+                                let horasDisponibles = await this.turnosService.getHoraDisponibleByFecha(servicioIdSeleccionado, fechaSeleccionada, sedeIdSeleccionado)
+  
+                                bot.action('cancha-' + servicioIdSeleccionado + fechaSeleccionada + sedeIdSeleccionado, (ctx) => {
+                                  if (horasDisponibles.length > 0) {
+                                    ctx.replyWithHTML('<b> Horario disponible </b>')
+                                    horasDisponibles.forEach(hora => {
+                                      ctx.reply('• ' + hora.toString().replace('T', ' ').substring(0, 16) + ' hs')
+                                    });
+                                  } else {
+                                    ctx.reply('No hay horarios disponibles para la fecha seleccionada.')
+                                  }
+  
+                               }) 
+                              })
+                          
+                              return m.inlineKeyboard(listMarkupsCancha, { columns : 1 })
+                          }))
+                      }) 
+                    })
+                    return m.inlineKeyboard(listMarkups, { columns : 1 })}))
+                } else {
+                  ctx.reply('Por el momento no hay turnos disponibles.')
+                }
+
               })
                             
               // Turno disponible por cancha, fecha y hora
